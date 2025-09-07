@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matrice 4x4 - Gestion de Tâche</title>
+    <style>
+        /* --- Styles Généraux --- */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 700px;
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 25px;
+        }
+
+        /* --- Grille 4x4 --- */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+        }
+
+        .cell {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100px;
+            border: 1px solid #dcdcdc;
+            border-radius: 8px;
+            font-size: 16px;
+            color: #333;
+            background-color: #fff;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            padding: 10px;
+            box-sizing: border-box;
+            text-align: center;
+        }
+
+        .cell:hover:not(.empty-cell) {
+            border-color: #007bff;
+            box-shadow: 0 0 8px rgba(0, 123, 255, 0.2);
+        }
+        
+        /* Cellule vide/non-interactive */
+        .empty-cell {
+            background-color: #f8f9fa;
+            border-style: dashed;
+            cursor: default;
+        }
+
+        /* --- Éléments dans les cellules --- */
+        .cell-content {
+            font-weight: 500;
+        }
+
+        .cell button {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: #007bff;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+        
+        .cell button:hover {
+            background: #0056b3;
+        }
+        
+        #d1 .add-user-btn {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            border: none;
+            background-color: #28a745;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            font-size: 18px;
+            line-height: 24px;
+            cursor: pointer;
+        }
+
+        /* --- Menu déroulant --- */
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 105%;
+            left: 0;
+            width: 100%;
+            background-color: white;
+            border: 1px solid #dcdcdc;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .dropdown-menu.show {
+            display: block;
+        }
+
+        .dropdown-item {
+            padding: 12px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background-color 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .dropdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown-item:hover {
+            background-color: #f0f2f5;
+        }
+        
+        .dropdown-item-content {
+            flex-grow: 1;
+        }
+
+        .add-item {
+            font-style: italic;
+            color: #007bff;
+            background-color: #f8f9fa;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .text-green {
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .text-red {
+            color: #dc3545;
+            font-weight: bold;
+        }
+
+        .delete-btn {
+            background: none;
+            border: none;
+            color: #dc3545;
+            font-size: 16px;
+            cursor: pointer;
+            margin-left: 10px;
+            padding: 0;
+            opacity: 0.5;
+            transition: opacity 0.2s;
+        }
+        
+        .delete-btn:hover {
+            opacity: 1;
+        }
+
+
+        /* --- Responsive Design --- */
+        @media (max-width: 600px) {
+            .grid {
+                gap: 10px;
+            }
+            .cell {
+                height: 80px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Gestion de Tâche</h1>
+    <div class="grid">
+        <div class="cell" id="a1">
+            <span class="cell-content">Locale</span>
+            <div class="dropdown-menu"></div>
+        </div>
+        <div class="cell empty-cell" id="b1"></div>
+        <div class="cell empty-cell" id="c1"></div>
+        <div class="cell" id="d1">
+            <span class="cell-content">Utilisateur</span>
+            <button class="add-user-btn" title="Ajouter un prénom">+</button>
+            <div class="dropdown-menu"></div>
+        </div>
+
+        <div class="cell" id="a2"><button>Début Tâche</button></div>
+        <div class="cell empty-cell" id="b2"></div>
+        <div class="cell" id="c2">
+            <span class="cell-content">Contrôle Rat</span>
+            <div class="dropdown-menu"></div>
+        </div>
+        <div class="cell empty-cell" id="d2"></div>
+
+        <div class="cell" id="a3"><button>Fin Tâche</button></div>
+        <div class="cell empty-cell" id="b3"></div>
+        <div class="cell" id="c3">
+            <span class="cell-content">Contrôle Xylophase</span>
+            <div class="dropdown-menu"></div>
+        </div>
+        <div class="cell empty-cell" id="d3"></div>
+
+        <div class="cell" id="a4">
+            <span class="cell-content">A4</span>
+            <div class="dropdown-menu"></div>
+        </div>
+        <div class="cell" id="b4">
+            <span class="cell-content">B4</span>
+            <div class="dropdown-menu"></div>
+        </div>
+        <div class="cell" id="c4">
+            <span class="cell-content">C4</span>
+            <div class="dropdown-menu"></div>
+        </div>
+        <div class="cell" id="d4">
+            <span class="cell-content">D4</span>
+            <div class="dropdown-menu"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    
+    // Noms d'utilisateur initiaux pour la réinitialisation
+    const initialUsers = ['Anniva', 'Tina'];
+    
+    // --- FONCTION UTILITAIRE POUR CRÉER UN ÉLÉMENT ---
+    function createDropdownItem(text, deletable = false) {
+        const item = document.createElement('div');
+        item.className = 'dropdown-item';
+        const contentSpan = document.createElement('span');
+        contentSpan.className = 'dropdown-item-content';
+        contentSpan.textContent = text;
+        item.appendChild(contentSpan);
+
+        if (deletable) {
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'delete-btn';
+            deleteBtn.textContent = '🗑️';
+            item.appendChild(deleteBtn);
+        }
+        return item;
+    }
+
+    // --- FONCTION DE RÉINITIALISATION DE D1 ---
+    function resetD1() {
+        const d1Menu = document.querySelector('#d1 .dropdown-menu');
+        // Vider le menu
+        d1Menu.innerHTML = '';
+        // Réinsérer les noms d'utilisateur initiaux
+        initialUsers.forEach(user => {
+            d1Menu.appendChild(createDropdownItem(user));
+        });
+        // Réinitialiser le contenu affiché de la cellule D1
+        document.querySelector('#d1 .cell-content').textContent = 'Utilisateur';
+    }
+
+    // --- CONFIGURATION INITIALE DES CELLULES ---
+
+    // A1
+    const a1Menu = document.querySelector('#a1 .dropdown-menu');
+    for (let i = 1; i <= 10; i++) {
+        a1Menu.appendChild(createDropdownItem(`P${i}`));
+    }
+    
+    // D1
+    const d1Menu = document.querySelector('#d1 .dropdown-menu');
+    initialUsers.forEach(user => {
+        d1Menu.appendChild(createDropdownItem(user));
+    });
+    
+    // C2
+    const c2Menu = document.querySelector('#c2 .dropdown-menu');
+    const ratItem = createDropdownItem('Rat');
+    ratItem.dataset.colorState = '0';
+    c2Menu.appendChild(ratItem);
+    
+    const addPlaceItem = createDropdownItem('Ajouter un endroit...');
+    addPlaceItem.classList.add('add-item');
+    c2Menu.appendChild(addPlaceItem);
+
+    // C3
+    const c3Menu = document.querySelector('#c3 .dropdown-menu');
+    const xylophaseItem = createDropdownItem('Xylophase');
+    xylophaseItem.dataset.colorState = '0';
+    c3Menu.appendChild(xylophaseItem);
+
+
+    // A4, B4, C4, D4
+    const row4Cells = ['#a4', '#b4', '#c4', '#d4'];
+    const row4Options = ['Vide', '1', '2', '3'];
+    row4Cells.forEach(cellId => {
+        const menu = document.querySelector(`${cellId} .dropdown-menu`);
+        row4Options.forEach(optionText => {
+            menu.appendChild(createDropdownItem(optionText));
+        });
+    });
+
+    // --- GESTION DES ÉVÉNEMENTS ---
+
+    const grid = document.querySelector('.grid');
+    let activeMenu = null;
+
+    grid.addEventListener('click', function(event) {
+        const cell = event.target.closest('.cell');
+        if (!cell || cell.classList.contains('empty-cell')) return;
+        
+        // Clic sur le bouton de suppression
+        if (event.target.classList.contains('delete-btn')) {
+            const itemToDelete = event.target.closest('.dropdown-item');
+            if (itemToDelete) {
+                itemToDelete.remove();
+                // Vérifier si la liste D1 doit être réinitialisée
+                const d1MenuItems = d1Menu.querySelectorAll('.dropdown-item');
+                let userCreatedItemsExist = false;
+                d1MenuItems.forEach(item => {
+                    const content = item.querySelector('.dropdown-item-content').textContent;
+                    if (!initialUsers.includes(content)) {
+                        userCreatedItemsExist = true;
+                    }
+                });
+                if (!userCreatedItemsExist) {
+                    resetD1();
+                }
+            }
+            return;
+        }
+
+        // Clic sur le bouton "+" dans D1
+        if (event.target.classList.contains('add-user-btn')) {
+            const newName = prompt("Veuillez entrer un nouveau prénom :");
+            if (newName && newName.trim() !== '') {
+                d1Menu.appendChild(createDropdownItem(newName.trim(), true));
+                alert(`"${newName.trim()}" a été ajouté à la liste.`);
+            }
+            return;
+        }
+
+        // Clic sur un bouton d'heure
+        if (event.target.tagName === 'BUTTON' && event.target.textContent !== '+' && event.target.textContent !== '🗑️') {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const timeString = `${hours}:${minutes}`;
+            
+            cell.innerHTML = `<span class="cell-content">${timeString}</span>`;
+            cell.style.cursor = 'default';
+            return;
+        }
+
+        // Clic sur une option dans un menu déroulant
+        const dropdownItem = event.target.closest('.dropdown-item');
+        if (dropdownItem) {
+            
+            // Cas pour "Ajouter un endroit..." dans C2
+            if (cell.id === 'c2' && dropdownItem.classList.contains('add-item')) {
+                const newPlace = prompt("Ajouter un nouvel endroit :");
+                if (newPlace && newPlace.trim() !== '') {
+                    const newItem = createDropdownItem(newPlace.trim(), true);
+                    newItem.dataset.colorState = '0';
+                    c2Menu.insertBefore(newItem, dropdownItem);
+                }
+                return;
+            }
+
+            // Logique de changement de couleur pour C2 et C3
+            if ((cell.id === 'c2' && !dropdownItem.classList.contains('add-item')) || cell.id === 'c3') {
+                const item = dropdownItem;
+                let currentState = parseInt(item.dataset.colorState || '0');
+                
+                currentState = (currentState + 1) % 3;
+                item.dataset.colorState = currentState;
+                
+                item.classList.remove('text-green', 'text-red');
+                if (currentState === 1) {
+                    item.classList.add('text-green');
+                } else if (currentState === 2) {
+                    item.classList.add('text-red');
+                }
+                
+                return;
+            }
+            
+            // Comportement normal pour toutes les autres cellules
+            const contentSpan = cell.querySelector('.cell-content');
+            contentSpan.textContent = dropdownItem.querySelector('.dropdown-item-content').textContent;
+            if (activeMenu) {
+                activeMenu.classList.remove('show');
+                activeMenu = null;
+            }
+            return;
+        }
+        
+        // Clic pour ouvrir ou fermer un menu
+        const menu = cell.querySelector('.dropdown-menu');
+        if (menu) {
+            if (activeMenu && activeMenu !== menu) {
+                activeMenu.classList.remove('show');
+            }
+            menu.classList.toggle('show');
+            activeMenu = menu.classList.contains('show') ? menu : null;
+        }
+    });
+
+    // Fermer le menu si on clique ailleurs
+    document.addEventListener('click', function(event) {
+        if (!event.target.closest('.cell') && activeMenu) {
+            activeMenu.classList.remove('show');
+            activeMenu = null;
+        }
+    });
+});
+</script>
+
+</body>
+</html>
