@@ -57,6 +57,9 @@
             padding: 10px;
             box-sizing: border-box;
             text-align: center;
+            overflow: hidden; /* Prevent text overflow on small screens */
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         .cell:hover:not(.empty-cell) {
@@ -148,6 +151,9 @@
         
         .dropdown-item-content {
             flex-grow: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         .add-item {
@@ -249,6 +255,37 @@
         #notification-banner.show {
             opacity: 1;
         }
+        
+        /* --- MEDIA QUERIES pour le responsive design --- */
+        @media (max-width: 600px) {
+            .grid {
+                gap: 10px;
+            }
+            .cell {
+                height: 80px;
+                font-size: 14px;
+            }
+            .container {
+                padding: 15px;
+            }
+            h1 {
+                font-size: 24px;
+                margin-bottom: 15px;
+            }
+            .cell button {
+                font-size: 12px;
+            }
+            .dropdown-menu {
+                max-height: 150px;
+            }
+            .dropdown-item {
+                padding: 8px 10px;
+            }
+            #results-table th, #results-table td {
+                padding: 8px 10px;
+                font-size: 14px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -256,7 +293,7 @@
 <div id="notification-banner">Tâche complète ! 🎉</div>
 
 <div class="container">
-    <h1>Projet II: Gestion de Tâche</h1>
+    <h1>Gestion de Tâche</h1>
     <div class="grid">
         <div class="cell" id="a1" data-initial-text="Locale">
             <span class="cell-content">Locale</span>
@@ -354,7 +391,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 valueCell.textContent = result.value;
                 valueCell.style.color = result.color;
 
-                // Re-apply bold style based on color
                 if (result.color === 'rgb(40, 167, 69)' || result.color === 'rgb(220, 53, 69)') {
                     valueCell.style.fontWeight = 'bold';
                 }
@@ -437,7 +473,6 @@ document.addEventListener('DOMContentLoaded', function() {
         
         const orderedIds = ['a1', 'a2', 'a3', 'a4', 'b4', 'c2', 'c3', 'c4', 'd1', 'd4'];
         
-        // Créer un objet temporaire pour stocker les nouvelles valeurs
         const tempResults = {};
         orderedIds.forEach(id => {
             const cell = document.getElementById(id);
@@ -466,11 +501,9 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
         
-        // Charger les résultats existants et les fusionner avec les nouveaux
         const savedResults = localStorage.getItem('taskResults');
         let combinedResults = savedResults ? JSON.parse(savedResults) : [];
         
-        // Mettre à jour les valeurs existantes ou ajouter les nouvelles
         Object.keys(tempResults).forEach(id => {
             const existingEntryIndex = combinedResults.findIndex(r => r.id === id);
             if (existingEntryIndex > -1) {
@@ -480,10 +513,8 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
-        // Filtrer les résultats pour ne garder que ceux qui ont une valeur
         combinedResults = combinedResults.filter(r => r.value !== null && r.value !== '');
 
-        // Vider le tableau et le remplir dans l'ordre
         tableBody.innerHTML = '';
         orderedIds.forEach(id => {
             const result = combinedResults.find(r => r.id === id.toUpperCase());
@@ -542,7 +573,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const notification = document.getElementById('notification-banner');
         notification.classList.add('show');
         
-        // Réinitialiser la matrice après 2 secondes
         setTimeout(() => {
             notification.classList.remove('show');
             resetAll();
@@ -582,7 +612,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Chargement initial des résultats
     loadResults();
 
     // --- GESTION DES ÉVÉNEMENTS ---
@@ -1191,3 +1220,4 @@ document.addEventListener('DOMContentLoaded', function() {
 
 </html>
 -->
+
