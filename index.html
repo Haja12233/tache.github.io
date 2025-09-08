@@ -6,6 +6,10 @@
     <title>Matrice 4x4 - Gestion de Tâche</title>
     <style>
         /* --- Styles Généraux --- */
+        * {
+            box-sizing: border-box;
+        }
+        
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: #f0f2f5;
@@ -15,15 +19,14 @@
             align-items: center;
             min-height: 100vh;
             margin: 0;
-            padding: 20px;
-            box-sizing: border-box;
+            padding: 15px;
         }
 
         .container {
             width: 100%;
             max-width: 700px;
             background: #ffffff;
-            padding: 25px;
+            padding: 20px;
             border-radius: 16px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
@@ -31,14 +34,15 @@
         h1 {
             text-align: center;
             color: #333;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
         }
 
         /* --- Grille 4x4 --- */
         .grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
+            gap: 10px;
         }
 
         .cell {
@@ -46,17 +50,17 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100px;
+            min-height: 70px;
             border: 1px solid #dcdcdc;
             border-radius: 8px;
-            font-size: 16px;
+            font-size: 14px;
             color: #333;
             background-color: #fff;
             cursor: pointer;
             transition: all 0.2s ease-in-out;
-            padding: 10px;
-            box-sizing: border-box;
+            padding: 8px;
             text-align: center;
+            word-break: break-word;
         }
 
         .cell:hover:not(.empty-cell) {
@@ -84,9 +88,10 @@
             color: white;
             border-radius: 8px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 12px;
             font-weight: bold;
             transition: background-color 0.2s;
+            padding: 5px;
         }
         
         .cell button:hover {
@@ -95,16 +100,16 @@
         
         #d1 .add-user-btn {
             position: absolute;
-            bottom: 5px;
-            right: 5px;
+            bottom: 3px;
+            right: 3px;
             border: none;
             background-color: #28a745;
             color: white;
-            width: 24px;
-            height: 24px;
+            width: 20px;
+            height: 20px;
             border-radius: 50%;
-            font-size: 18px;
-            line-height: 24px;
+            font-size: 14px;
+            line-height: 20px;
             cursor: pointer;
         }
 
@@ -112,7 +117,7 @@
         .dropdown-menu {
             display: none;
             position: absolute;
-            top: 105%;
+            top: 100%;
             left: 0;
             width: 100%;
             background-color: white;
@@ -120,7 +125,7 @@
             border-radius: 8px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             z-index: 10;
-            max-height: 200px;
+            max-height: 150px;
             overflow-y: auto;
         }
 
@@ -129,13 +134,14 @@
         }
 
         .dropdown-item {
-            padding: 12px 15px;
+            padding: 8px 10px;
             cursor: pointer;
             border-bottom: 1px solid #f0f0f0;
             transition: background-color 0.2s;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            font-size: 13px;
         }
         
         .dropdown-item:last-child {
@@ -172,9 +178,9 @@
             background: none;
             border: none;
             color: #dc3545;
-            font-size: 16px;
+            font-size: 14px;
             cursor: pointer;
-            margin-left: 10px;
+            margin-left: 5px;
             padding: 0;
             opacity: 0.5;
             transition: opacity 0.2s;
@@ -195,26 +201,30 @@
         
         /* --- Tableau des résultats --- */
         #results-container {
-            margin-top: 40px;
+            margin-top: 30px;
             width: 100%;
             max-width: 700px;
+            overflow-x: auto;
         }
         
         #results-container h2 {
             display: inline-block;
-            margin-right: 15px;
+            margin-right: 10px;
+            font-size: 1.3rem;
         }
         
         #results-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 15px;
+            margin-top: 10px;
+            min-width: 300px;
         }
         
         #results-table th, #results-table td {
-            padding: 12px 15px;
+            padding: 10px;
             text-align: left;
             border-bottom: 1px solid #dcdcdc;
+            font-size: 14px;
         }
         
         #results-table th {
@@ -230,24 +240,164 @@
         /* --- Notification de tâche complète --- */
         #notification-banner {
             position: fixed;
-            top: 20px;
+            top: 15px;
             left: 50%;
             transform: translateX(-50%);
-            padding: 15px 30px;
+            padding: 12px 25px;
             background-color: #28a745;
             color: white;
             font-weight: bold;
-            font-size: 18px;
+            font-size: 16px;
             border-radius: 8px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
             z-index: 100;
             opacity: 0;
             transition: opacity 0.5s ease-in-out;
             pointer-events: none;
+            max-width: 90%;
+            text-align: center;
         }
 
         #notification-banner.show {
             opacity: 1;
+        }
+
+        /* --- Media Queries pour le Responsive --- */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 1.3rem;
+                margin-bottom: 15px;
+            }
+            
+            .grid {
+                gap: 8px;
+            }
+            
+            .cell {
+                min-height: 60px;
+                font-size: 12px;
+                padding: 6px;
+            }
+            
+            .cell button {
+                font-size: 11px;
+            }
+            
+            #d1 .add-user-btn {
+                width: 18px;
+                height: 18px;
+                font-size: 12px;
+                line-height: 18px;
+            }
+            
+            .dropdown-item {
+                padding: 6px 8px;
+                font-size: 12px;
+            }
+            
+            #results-container h2 {
+                font-size: 1.2rem;
+            }
+            
+            #results-table th, #results-table td {
+                padding: 8px;
+                font-size: 12px;
+            }
+            
+            #notification-banner {
+                font-size: 14px;
+                padding: 10px 20px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            body {
+                padding: 10px;
+                justify-content: flex-start;
+            }
+            
+            .container {
+                padding: 12px;
+                border-radius: 12px;
+            }
+            
+            h1 {
+                font-size: 1.2rem;
+            }
+            
+            .grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 6px;
+            }
+            
+            .cell {
+                min-height: 50px;
+                font-size: 11px;
+            }
+            
+            .cell button {
+                font-size: 10px;
+            }
+            
+            .dropdown-menu {
+                max-height: 120px;
+            }
+            
+            #results-container {
+                margin-top: 20px;
+            }
+            
+            #results-container h2 {
+                font-size: 1.1rem;
+            }
+            
+            #results-table {
+                font-size: 11px;
+            }
+            
+            #notification-banner {
+                font-size: 13px;
+                padding: 8px 16px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .cell {
+                min-height: 45px;
+            }
+            
+            #results-table th, #results-table td {
+                padding: 6px;
+                font-size: 11px;
+            }
+        }
+
+        /* Pour les très petits appareils en orientation paysage */
+        @media (max-height: 500px) and (orientation: landscape) {
+            body {
+                padding: 5px;
+            }
+            
+            .container {
+                padding: 10px;
+            }
+            
+            .cell {
+                min-height: 40px;
+                font-size: 10px;
+            }
+            
+            #results-container {
+                margin-top: 15px;
+            }
         }
     </style>
 </head>
@@ -1518,3 +1668,4 @@ document.addEventListener('DOMContentLoaded', function() {
 </body>
 </html>
 -->
+
