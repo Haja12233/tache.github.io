@@ -50,7 +50,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            aspect-ratio: 1/1; /* Garde les cellules carrées */
+            aspect-ratio: 1/1;
             border: 1px solid #dcdcdc;
             border-radius: 8px;
             font-size: 14px;
@@ -96,21 +96,6 @@
         
         .cell button:hover {
             background: #0056b3;
-        }
-        
-        #d1 .add-user-btn {
-            position: absolute;
-            bottom: 3px;
-            right: 3px;
-            border: none;
-            background-color: #28a745;
-            color: white;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            font-size: 14px;
-            line-height: 20px;
-            cursor: pointer;
         }
 
         /* --- Menu déroulant --- */
@@ -174,22 +159,6 @@
             font-weight: bold;
         }
 
-        .delete-btn {
-            background: none;
-            border: none;
-            color: #dc3545;
-            font-size: 14px;
-            cursor: pointer;
-            margin-left: 5px;
-            padding: 0;
-            opacity: 0.5;
-            transition: opacity 0.2s;
-        }
-        
-        .delete-btn:hover {
-            opacity: 1;
-        }
-
         /* Style des couleurs des cellules principales C2 et C3 */
         .cell#c2.text-green, .cell#c3.text-green {
             color: #28a745;
@@ -204,27 +173,41 @@
             margin-top: 30px;
             width: 100%;
             max-width: 700px;
-            overflow-x: auto;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
         
-        #results-container h2 {
-            display: inline-block;
-            margin-right: 10px;
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #007bff;
+        }
+        
+        .results-header h2 {
+            margin: 0;
+            color: #333;
             font-size: 1.3rem;
+        }
+        
+        .date-display {
+            font-weight: bold;
+            color: #007bff;
         }
         
         #results-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 10px;
-            min-width: 300px;
         }
         
         #results-table th, #results-table td {
-            padding: 10px;
-            text-align: left;
-            border-bottom: 1px solid #dcdcdc;
-            font-size: 14px;
+            padding: 12px 15px;
+            text-align: center;
+            border: 1px solid #dcdcdc;
         }
         
         #results-table th {
@@ -235,6 +218,10 @@
         
         #results-table tr:nth-child(even) {
             background-color: #f8f9fa;
+        }
+        
+        .result-value {
+            font-weight: bold;
         }
 
         /* --- Notification de tâche complète --- */
@@ -286,19 +273,12 @@
                 font-size: 11px;
             }
             
-            #d1 .add-user-btn {
-                width: 18px;
-                height: 18px;
-                font-size: 12px;
-                line-height: 18px;
-            }
-            
             .dropdown-item {
                 padding: 6px 8px;
                 font-size: 12px;
             }
             
-            #results-container h2 {
+            .results-header h2 {
                 font-size: 1.2rem;
             }
             
@@ -347,14 +327,22 @@
             
             #results-container {
                 margin-top: 20px;
+                padding: 15px;
             }
             
-            #results-container h2 {
+            .results-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+            }
+            
+            .results-header h2 {
                 font-size: 1.1rem;
             }
             
             #results-table {
-                font-size: 11px;
+                display: block;
+                overflow-x: auto;
             }
             
             #results-table th, #results-table td {
@@ -400,6 +388,7 @@
             
             #results-container {
                 margin-top: 15px;
+                padding: 10px;
             }
         }
     </style>
@@ -409,17 +398,16 @@
 <div id="notification-banner">Tâche complète ! 🎉</div>
 
 <div class="container">
-    <h1>Projet II: Gestion de Tâche</h1>
+    <h1>Gestion de Tâche</h1>
     <div class="grid">
         <div class="cell" id="a1" data-initial-text="Locale">
-            <span class="cell-content">Locale</span>
+            <span class="cell-content">Local</span>
             <div class="dropdown-menu"></div>
         </div>
         <div class="cell empty-cell" id="b1" data-initial-text=""></div>
         <div class="cell empty-cell" id="c1" data-initial-text=""></div>
         <div class="cell" id="d1" data-initial-text="Utilisateur">
             <span class="cell-content">Utilisateur</span>
-            <button class="add-user-btn" title="Ajouter un prénom">+</button>
             <div class="dropdown-menu"></div>
         </div>
 
@@ -459,16 +447,39 @@
 </div>
 
 <div id="results-container">
-    <h2>Résultats</h2>
+    <div class="results-header">
+        <h2>Résultat du Jours</h2>
+        <div class="date-display">Date: <span id="current-date">08/09/2025</span></div>
+    </div>
     <table id="results-table">
         <thead>
             <tr>
-                <th>Case</th>
-                <th>Valeur</th>
+                <th>N° Locale</th>
+                <th>Début</th>
+                <th>Fin</th>
+                <th>User</th>
+                <th>C2</th>
+                <th>C3</th>
+                <th>A4</th>
+                <th>B4</th>
+                <th>C4</th>
+                <th>D4</th>
             </tr>
         </thead>
         <tbody>
-            </tbody>
+            <tr>
+                <td class="result-value" id="result-a1"></td>
+                <td class="result-value" id="result-a2"></td>
+                <td class="result-value" id="result-a3"></td>
+                <td class="result-value" id="result-d1"></td>
+                <td class="result-value" id="result-c2"></td>
+                <td class="result-value" id="result-c3"></td>
+                <td class="result-value" id="result-a4"></td>
+                <td class="result-value" id="result-b4"></td>
+                <td class="result-value" id="result-c4"></td>
+                <td class="result-value" id="result-d4"></td>
+            </tr>
+        </tbody>
     </table>
 </div>
 
@@ -477,18 +488,51 @@ document.addEventListener('DOMContentLoaded', function() {
     
     const initialUsers = ['Anniva', 'Tina'];
     const initialC2Item = 'Rat';
-    const initialC2AddItem = 'Ajouter un endroit...';
+    const initialC2AddItem = '+';
+
+    // Mettre à jour la date actuelle
+    function updateCurrentDate() {
+        const now = new Date();
+        const day = String(now.getDate()).padStart(2, '0');
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const year = now.getFullYear();
+        document.getElementById('current-date').textContent = `${day}/${month}/${year}`;
+    }
+    
+    updateCurrentDate();
 
     // --- Fonctions de sauvegarde et de chargement ---
     function saveResults() {
-        const tableBody = document.querySelector('#results-table tbody');
-        const rows = Array.from(tableBody.querySelectorAll('tr'));
-        const results = rows.map(row => {
-            const id = row.children[0].textContent;
-            const value = row.children[1].textContent;
-            const color = window.getComputedStyle(row.children[1]).color;
-            return { id, value, color };
+        const results = {};
+        const cellsToSave = ['a1', 'a2', 'a3', 'a4', 'b4', 'c2', 'c3', 'c4', 'd1', 'd4'];
+        
+        cellsToSave.forEach(id => {
+            const cell = document.getElementById(id);
+            if (!cell) return;
+            
+            const initialText = cell.getAttribute('data-initial-text');
+            const contentSpan = cell.querySelector('.cell-content');
+            const contentButton = cell.querySelector('button');
+            
+            let currentValue = '';
+            let color = '';
+
+            if (contentSpan) {
+                currentValue = contentSpan.textContent.trim();
+                if (cell.classList.contains('text-green')) {
+                    color = 'green';
+                } else if (cell.classList.contains('text-red')) {
+                    color = 'red';
+                }
+            } else if (contentButton) {
+                currentValue = contentButton.textContent.trim();
+            }
+
+            if (currentValue && currentValue !== initialText) {
+                results[id] = { value: currentValue, color: color };
+            }
         });
+        
         localStorage.setItem('taskResults', JSON.stringify(results));
     }
 
@@ -496,44 +540,58 @@ document.addEventListener('DOMContentLoaded', function() {
         const savedResults = localStorage.getItem('taskResults');
         if (savedResults) {
             const results = JSON.parse(savedResults);
-            const tableBody = document.querySelector('#results-table tbody');
-            tableBody.innerHTML = '';
-            results.forEach(result => {
-                const row = document.createElement('tr');
-                const idCell = document.createElement('td');
-                const valueCell = document.createElement('td');
+            
+            for (const id in results) {
+                const cell = document.getElementById(id);
+                if (!cell) continue;
                 
-                idCell.textContent = result.id;
-                valueCell.textContent = result.value;
-                valueCell.style.color = result.color;
-
-                // Re-apply bold style based on color
-                if (result.color === 'rgb(40, 167, 69)' || result.color === 'rgb(220, 53, 69)') {
-                    valueCell.style.fontWeight = 'bold';
+                const contentSpan = cell.querySelector('.cell-content');
+                const contentButton = cell.querySelector('button');
+                
+                if (contentSpan) {
+                    contentSpan.textContent = results[id].value;
+                    if (results[id].color === 'green') {
+                        cell.classList.add('text-green');
+                    } else if (results[id].color === 'red') {
+                        cell.classList.add('text-red');
+                    }
+                } else if (contentButton) {
+                    contentButton.textContent = results[id].value;
                 }
                 
-                row.appendChild(idCell);
-                row.appendChild(valueCell);
-                tableBody.appendChild(row);
-            });
+                // Mettre à jour le tableau des résultats
+                updateResultCell(id, results[id].value, results[id].color);
+            }
+        }
+    }
+
+    // Mettre à jour une cellule du tableau de résultats
+    function updateResultCell(cellId, value, color) {
+        const resultCell = document.getElementById(`result-${cellId}`);
+        if (resultCell) {
+            resultCell.textContent = value;
+            
+            // Réinitialiser les couleurs
+            resultCell.classList.remove('text-green', 'text-red');
+            
+            // Appliquer la couleur si spécifiée
+            if (color === 'green') {
+                resultCell.classList.add('text-green');
+            } else if (color === 'red') {
+                resultCell.classList.add('text-red');
+            }
         }
     }
 
     // --- FONCTION UTILITAIRE POUR CRÉER UN ÉLÉMENT ---
-    function createDropdownItem(text, deletable = false) {
+    // La fonction de suppression a été enlevée d'ici
+    function createDropdownItem(text) {
         const item = document.createElement('div');
         item.className = 'dropdown-item';
         const contentSpan = document.createElement('span');
         contentSpan.className = 'dropdown-item-content';
         contentSpan.textContent = text;
         item.appendChild(contentSpan);
-
-        if (deletable) {
-            const deleteBtn = document.createElement('button');
-            deleteBtn.className = 'delete-btn';
-            deleteBtn.textContent = '🗑️';
-            item.appendChild(deleteBtn);
-        }
         return item;
     }
 
@@ -544,7 +602,13 @@ document.addEventListener('DOMContentLoaded', function() {
         initialUsers.forEach(user => {
             d1Menu.appendChild(createDropdownItem(user));
         });
+        // On rajoute l'option d'ajout
+        const addUserItem = createDropdownItem('+');
+        addUserItem.classList.add('add-item');
+        d1Menu.appendChild(addUserItem);
+
         document.querySelector('#d1 .cell-content').textContent = 'Utilisateur';
+        updateResultCell('d1', '');
     }
 
     // --- FONCTION DE RÉINITIALISATION DE C2 ---
@@ -558,6 +622,7 @@ document.addEventListener('DOMContentLoaded', function() {
         c2Menu.appendChild(addPlaceItem);
         document.querySelector('#c2 .cell-content').textContent = 'Contrôle Rat';
         document.querySelector('#c2').classList.remove('text-green', 'text-red');
+        updateResultCell('c2', '');
     }
 
     // --- FONCTION DE RÉINITIALISATION DE TOUTES LES CASES ---
@@ -578,6 +643,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 contentButton.textContent = initialText;
             }
             cell.classList.remove('text-green', 'text-red');
+            
+            // Réinitialiser le tableau des résultats
+            updateResultCell(id, '');
         });
         
         resetD1();
@@ -586,13 +654,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // --- FONCTION POUR METTRE À JOUR LE TABLEAU DES RÉSULTATS ---
     function updateResultsTable() {
-        const tableBody = document.querySelector('#results-table tbody');
+        const cellsToUpdate = ['a1', 'a2', 'a3', 'a4', 'b4', 'c2', 'c3', 'c4', 'd1', 'd4'];
         
-        const orderedIds = ['a1', 'a2', 'a3', 'a4', 'b4', 'c2', 'c3', 'c4', 'd1', 'd4'];
-        
-        // Créer un objet temporaire pour stocker les nouvelles valeurs
-        const tempResults = {};
-        orderedIds.forEach(id => {
+        cellsToUpdate.forEach(id => {
             const cell = document.getElementById(id);
             if (!cell) return;
             
@@ -606,56 +670,18 @@ document.addEventListener('DOMContentLoaded', function() {
             if (contentSpan) {
                 currentValue = contentSpan.textContent.trim();
                 if (cell.classList.contains('text-green')) {
-                    color = '#28a745';
+                    color = 'green';
                 } else if (cell.classList.contains('text-red')) {
-                    color = '#dc3545';
+                    color = 'red';
                 }
             } else if (contentButton) {
                 currentValue = contentButton.textContent.trim();
             }
 
             if (currentValue && currentValue !== initialText) {
-                tempResults[id.toUpperCase()] = { value: currentValue, color: color };
-            }
-        });
-        
-        // Charger les résultats existants et les fusionner avec les nouveaux
-        const savedResults = localStorage.getItem('taskResults');
-        let combinedResults = savedResults ? JSON.parse(savedResults) : [];
-        
-        // Mettre à jour les valeurs existantes ou ajouter les nouvelles
-        Object.keys(tempResults).forEach(id => {
-            const existingEntryIndex = combinedResults.findIndex(r => r.id === id);
-            if (existingEntryIndex > -1) {
-                combinedResults[existingEntryIndex] = { id: id, value: tempResults[id].value, color: tempResults[id].color };
+                updateResultCell(id, currentValue, color);
             } else {
-                combinedResults.push({ id: id, value: tempResults[id].value, color: tempResults[id].color });
-            }
-        });
-
-        // Filtrer les résultats pour ne garder que ceux qui ont une valeur
-        combinedResults = combinedResults.filter(r => r.value !== null && r.value !== '');
-
-        // Vider le tableau et le remplir dans l'ordre
-        tableBody.innerHTML = '';
-        orderedIds.forEach(id => {
-            const result = combinedResults.find(r => r.id === id.toUpperCase());
-            if (result) {
-                const row = document.createElement('tr');
-                const idCell = document.createElement('td');
-                const valueCell = document.createElement('td');
-                
-                idCell.textContent = result.id;
-                valueCell.textContent = result.value;
-                valueCell.style.color = result.color;
-                
-                if (result.color === 'rgb(40, 167, 69)' || result.color === 'rgb(220, 53, 69)') {
-                    valueCell.style.fontWeight = 'bold';
-                }
-
-                row.appendChild(idCell);
-                row.appendChild(valueCell);
-                tableBody.appendChild(row);
+                updateResultCell(id, '');
             }
         });
 
@@ -712,6 +738,10 @@ document.addEventListener('DOMContentLoaded', function() {
     initialUsers.forEach(user => {
         d1Menu.appendChild(createDropdownItem(user));
     });
+    // Ajout du bouton "+" dans le menu déroulant D1
+    const addUserItem = createDropdownItem('+');
+    addUserItem.classList.add('add-item');
+    d1Menu.appendChild(addUserItem);
     
     const c2Menu = document.querySelector('#c2 .dropdown-menu');
     const ratItem = createDropdownItem(initialC2Item);
@@ -746,54 +776,10 @@ document.addEventListener('DOMContentLoaded', function() {
         const cell = event.target.closest('.cell');
         if (!cell || cell.classList.contains('empty-cell')) return;
         
-        if (event.target.classList.contains('delete-btn')) {
-            const itemToDelete = event.target.closest('.dropdown-item');
-            const parentCell = event.target.closest('.cell');
-            if (itemToDelete) {
-                itemToDelete.remove();
-                if (parentCell.id === 'd1') {
-                    const d1MenuItems = d1Menu.querySelectorAll('.dropdown-item');
-                    let userCreatedItemsExist = false;
-                    d1MenuItems.forEach(item => {
-                        const content = item.querySelector('.dropdown-item-content').textContent;
-                        if (!initialUsers.includes(content)) {
-                            userCreatedItemsExist = true;
-                        }
-                    });
-                    if (!userCreatedItemsExist) {
-                        resetD1();
-                    }
-                } else if (parentCell.id === 'c2') {
-                    const c2MenuItems = c2Menu.querySelectorAll('.dropdown-item');
-                    let userCreatedItemsExist = false;
-                    c2MenuItems.forEach(item => {
-                        const content = item.querySelector('.dropdown-item-content').textContent;
-                        if (content !== initialC2Item && content !== initialC2AddItem) {
-                            userCreatedItemsExist = true;
-                        }
-                    });
-                    if (!userCreatedItemsExist) {
-                        resetC2();
-                    }
-                }
-            }
-            updateResultsTable();
-            checkCompletion();
-            return;
-        }
+        // La logique de suppression (delete-btn) a été enlevée.
+        // La logique pour le bouton add-user-btn a été enlevée.
 
-        if (event.target.classList.contains('add-user-btn')) {
-            const newName = prompt("Veuillez entrer un nouveau prénom :");
-            if (newName && newName.trim() !== '') {
-                d1Menu.appendChild(createDropdownItem(newName.trim(), true));
-                alert(`"${newName.trim()}" a été ajouté à la liste.`);
-                updateResultsTable();
-                checkCompletion();
-            }
-            return;
-        }
-
-        if (event.target.tagName === 'BUTTON' && event.target.textContent !== '+' && event.target.textContent !== '🗑️') {
+        if (event.target.tagName === 'BUTTON' && !event.target.classList.contains('delete-btn')) {
             const now = new Date();
             const hours = String(now.getHours()).padStart(2, '0');
             const minutes = String(now.getMinutes()).padStart(2, '0');
@@ -809,16 +795,30 @@ document.addEventListener('DOMContentLoaded', function() {
         const dropdownItem = event.target.closest('.dropdown-item');
         if (dropdownItem) {
             
+            // Logique pour "Ajouter un endroit..." dans C2
             if (cell.id === 'c2' && dropdownItem.classList.contains('add-item')) {
-                const newPlace = prompt("Ajouter un nouvel endroit :");
+                const newPlace = prompt("Veillez insèrè un endroit");
                 if (newPlace && newPlace.trim() !== '') {
-                    const newItem = createDropdownItem(newPlace.trim(), true);
+                    const newItem = createDropdownItem(newPlace.trim());
                     newItem.dataset.colorState = '0';
                     c2Menu.insertBefore(newItem, dropdownItem);
                     updateResultsTable();
                     checkCompletion();
                 }
                 return;
+            }
+            
+            // NOUVELLE logique pour "Ajouter un nom" dans D1
+            if (cell.id === 'd1' && dropdownItem.classList.contains('add-item')) {
+                const newName = prompt("Veuillez entrer un nouveau prénom :");
+                if (newName && newName.trim() !== '') {
+                    const newItem = createDropdownItem(newName.trim());
+                    // Insère le nouvel item avant le bouton "+ Ajouter"
+                    d1Menu.insertBefore(newItem, dropdownItem); 
+                    updateResultsTable();
+                    checkCompletion();
+                }
+                return; // On arrête ici pour ne pas sélectionner "+ Ajouter un nom" comme valeur
             }
 
             if ((cell.id === 'c2' && dropdownItem.dataset.colorState !== undefined) || (cell.id === 'c3' && dropdownItem.dataset.colorState !== undefined)) {
@@ -1671,5 +1671,6 @@ document.addEventListener('DOMContentLoaded', function() {
 </body>
 </html>
 -->
+
 
 
