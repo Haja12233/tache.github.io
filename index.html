@@ -154,6 +154,25 @@
             font-weight: bold;
         }
 
+        /* Bouton d'actualisation */
+        #refresh-button {
+            margin-top: 20px;
+            padding: 12px 25px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        #refresh-button:hover {
+            background-color: #218838;
+        }
+
         /* Notification */
         #notification-banner {
             position: fixed;
@@ -200,6 +219,10 @@
                 padding: 6px 8px;
                 font-size: 12px;
             }
+            #refresh-button {
+                padding: 10px 20px;
+                font-size: 14px;
+            }
         }
     </style>
 </head>
@@ -214,28 +237,34 @@
             <span class="cell-content">Locale</span>
             <div class="dropdown-menu"></div>
         </div>
-        <div class="cell empty-cell" id="b1" data-initial-text=""></div>
-        <div class="cell empty-cell" id="c1" data-initial-text=""></div>
+        <div class="cell empty-cell" id="b1" data-initial-text="">
+        </div>
+        <div class="cell empty-cell" id="c1" data-initial-text="">
+        </div>
         <div class="cell" id="d1" data-initial-text="Utilisateur">
             <span class="cell-content">Utilisateur</span>
             <div class="dropdown-menu"></div>
         </div>
 
         <div class="cell" id="a2" data-initial-text="Début Tâche"><button>Début Tâche</button></div>
-        <div class="cell empty-cell" id="b2" data-initial-text=""></div>
+        <div class="cell empty-cell" id="b2" data-initial-text="">
+        </div>
         <div class="cell" id="c2" data-initial-text="Contrôle Rat">
             <span class="cell-content">Contrôle Rat</span>
             <div class="dropdown-menu"></div>
         </div>
-        <div class="cell empty-cell" id="d2" data-initial-text=""></div>
+        <div class="cell empty-cell" id="d2" data-initial-text="">
+        </div>
 
         <div class="cell" id="a3" data-initial-text="Fin Tâche"><button>Fin Tâche</button></div>
-        <div class="cell empty-cell" id="b3" data-initial-text=""></div>
-        <div class="cell" id="c3" data-initial-text="Contrôle Xylophase">
-            <span class="cell-content">Contrôle Xylophase</span>
+        <div class="cell empty-cell" id="b3" data-initial-text="">
+        </div>
+        <div class="cell" id="c3" data-initial-text="Contrôle Xylophage">
+            <span class="cell-content">Contrôle Xylophage</span>
             <div class="dropdown-menu"></div>
         </div>
-        <div class="cell empty-cell" id="d3" data-initial-text=""></div>
+        <div class="cell empty-cell" id="d3" data-initial-text="">
+        </div>
 
         <div class="cell" id="a4" data-initial-text="A4">
             <span class="cell-content">A4</span>
@@ -254,6 +283,8 @@
             <div class="dropdown-menu"></div>
         </div>
     </div>
+    
+    <button id="refresh-button">🔄 Actualiser toutes les cases</button>
 </div>
 
 <script>
@@ -262,6 +293,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const initialUsers = ['Anniva', 'Tina'];
     let placesToControl = ['Chambre'];
     let ratMode = false; // Pour suivre si on est en mode Rat
+    let coloredItemsC2 = {}; // Pour stocker les éléments colorés de C2 avec leurs couleurs
+
+    // Cases obligatoires
+    const requiredCells = ['a1', 'a2', 'a3', 'c2', 'c3', 'd1'];
+    // Cases facultatives
+    const optionalCells = ['a4', 'b4', 'c4', 'd4'];
 
     // --- Sauvegarde ---
     function saveResults() {
@@ -348,6 +385,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.querySelector('#c2 .cell-content').textContent = 'Contrôle Rat';
         document.querySelector('#c2').classList.remove('text-green', 'text-red');
         ratMode = false;
+        coloredItemsC2 = {};
     }
 
     // --- Afficher les endroits à contrôler ---
@@ -357,7 +395,9 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Ajouter les endroits existants
         placesToControl.forEach(place => {
-            c2Menu.appendChild(createDropdownItem(place));
+            const item = createDropdownItem(place);
+            item.dataset.colorState = '0';
+            c2Menu.appendChild(item);
         });
         
         // Ajouter le bouton +
@@ -366,6 +406,32 @@ document.addEventListener('DOMContentLoaded', function() {
         c2Menu.appendChild(addItem);
         
         ratMode = true;
+    }
+
+    // --- Mettre à jour l'affichage des éléments colorés dans C2 ---
+    function updateColoredDisplay() {
+        const cellContent = document.querySelector('#c2 .cell-content');
+        const coloredItemsArray = Object.entries(coloredItemsC2);
+        
+        if (coloredItemsArray.length > 0) {
+            // Créer un conteneur pour les textes avec couleurs
+            let displayText = '';
+            coloredItemsArray.forEach(([text, color], index) => {
+                if (index > 0) displayText += ', ';
+                if (color === 'green') {
+                    displayText += `<span class="text-green">${text}</span>`;
+                } else if (color === 'red') {
+                    displayText += `<span class="text-red">${text}</span>`;
+                } else {
+                    displayText += text;
+                }
+            });
+            
+            // Utiliser innerHTML pour afficher les couleurs
+            cellContent.innerHTML = displayText;
+        } else {
+            cellContent.textContent = 'Rat';
+        }
     }
 
     function resetAll() {
@@ -388,6 +454,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         resetC2();
+        saveResults();
     }
 
     // --- Mise à jour des résultats ---
@@ -420,11 +487,9 @@ document.addEventListener('DOMContentLoaded', function() {
         saveResults();
     }
 
-    // --- Vérification de complétion ---
-    function checkCompletion() {
-        const requiredIds = ['a1', 'a2', 'a3', 'a4', 'b4', 'c2', 'c3', 'c4', 'd1', 'd4'];
-        
-        for (const id of requiredIds) {
+    // --- Vérification de complétion des cases obligatoires ---
+    function checkRequiredCompletion() {
+        for (const id of requiredCells) {
             const cell = document.getElementById(id);
             if (!cell) return false;
             
@@ -444,17 +509,72 @@ document.addEventListener('DOMContentLoaded', function() {
                 return false;
             }
         }
-        showCompletionNotification();
         return true;
+    }
+
+    // --- Vérification de complétion des cases facultatives ---
+    function checkOptionalCompletion() {
+        for (const id of optionalCells) {
+            const cell = document.getElementById(id);
+            if (!cell) return false;
+            
+            const initialText = cell.getAttribute('data-initial-text');
+            const contentSpan = cell.querySelector('.cell-content');
+            const contentButton = cell.querySelector('button');
+            
+            let currentValue = '';
+            
+            if (contentSpan) {
+                currentValue = contentSpan.textContent.trim();
+            } else if (contentButton) {
+                currentValue = contentButton.textContent.trim();
+            }
+            
+            if (!currentValue || currentValue === initialText) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    // --- Vérification de complétion générale ---
+    function checkCompletion() {
+        // Vérifier si toutes les cases obligatoires sont remplies
+        if (checkRequiredCompletion()) {
+            // Vérifier si les cases facultatives sont également remplies
+            if (checkOptionalCompletion()) {
+                // Toutes les cases sont remplies - afficher notification de succès
+                showCompletionNotification();
+                return true;
+            }
+        }
+        return false;
     }
 
     function showCompletionNotification() {
         const notification = document.getElementById('notification-banner');
+        notification.textContent = 'Tâche complète ! 🎉';
         notification.classList.add('show');
         
         setTimeout(() => {
             notification.classList.remove('show');
             resetAll();
+        }, 2000);
+    }
+
+    // --- Fonction d'actualisation manuelle ---
+    function manualRefresh() {
+        resetAll();
+        showRefreshNotification();
+    }
+
+    function showRefreshNotification() {
+        const notification = document.getElementById('notification-banner');
+        notification.textContent = 'Toutes les cases ont été réinitialisées ! 🔄';
+        notification.classList.add('show');
+        
+        setTimeout(() => {
+            notification.classList.remove('show');
         }, 2000);
     }
 
@@ -475,9 +595,9 @@ document.addEventListener('DOMContentLoaded', function() {
     resetC2();
 
     const c3Menu = document.querySelector('#c3 .dropdown-menu');
-    const xylophaseItem = createDropdownItem('Xylophase');
-    xylophaseItem.dataset.colorState = '0';
-    c3Menu.appendChild(xylophaseItem);
+    const xylophageItem = createDropdownItem('Xylophage');
+    xylophageItem.dataset.colorState = '0';
+    c3Menu.appendChild(xylophageItem);
 
     const row4Cells = ['#a4', '#b4', '#c4', '#d4'];
     const row4Options = ['Vide', '1', '2', '3'];
@@ -515,6 +635,20 @@ document.addEventListener('DOMContentLoaded', function() {
         if (dropdownItem) {
             const cellId = cell.id;
 
+            // D1 : Gérer l'ajout de nouveaux utilisateurs
+            if (cellId === 'd1' && dropdownItem.classList.contains('add-item')) {
+                const newName = prompt("Veuillez entrer un nouveau prénom :");
+                if (newName && newName.trim() !== '') {
+                    const newItem = createDropdownItem(newName.trim());
+                    const d1Menu = document.querySelector('#d1 .dropdown-menu');
+                    // Insère le nouvel item avant le bouton "+ Ajouter"
+                    d1Menu.insertBefore(newItem, dropdownItem); 
+                    updateResults();
+                    checkCompletion();
+                }
+                return;
+            }
+
             // C2 : Gérer R et Rat
             if (cellId === 'c2') {
                 const text = dropdownItem.querySelector('.dropdown-item-content').textContent;
@@ -539,12 +673,46 @@ document.addEventListener('DOMContentLoaded', function() {
                     return;
                 }
 
+                // Gestion des couleurs pour les endroits (mode Rat)
+                if (ratMode && dropdownItem.dataset.colorState !== undefined) {
+                    let currentState = parseInt(dropdownItem.dataset.colorState || '0');
+                    currentState = (currentState + 1) % 3;
+                    dropdownItem.dataset.colorState = currentState;
+
+                    dropdownItem.classList.remove('text-green', 'text-red');
+                    cell.classList.remove('text-green', 'text-red');
+
+                    // Mettre à jour la liste des éléments colorés
+                    const itemText = dropdownItem.querySelector('.dropdown-item-content').textContent;
+                    
+                    if (currentState === 1) {
+                        dropdownItem.classList.add('text-green');
+                        cell.classList.add('text-green');
+                        coloredItemsC2[itemText] = 'green';
+                    } else if (currentState === 2) {
+                        dropdownItem.classList.add('text-red');
+                        cell.classList.add('text-red');
+                        coloredItemsC2[itemText] = 'red';
+                    } else {
+                        // Retirer la couleur
+                        delete coloredItemsC2[itemText];
+                        cell.classList.remove('text-green', 'text-red');
+                    }
+
+                    // Mettre à jour l'affichage dans la cellule
+                    updateColoredDisplay();
+                    updateResults();
+                    checkCompletion();
+                    return;
+                }
+
                 // Si on est en mode Rat et on clique sur "+"
                 if (ratMode && dropdownItem.classList.contains('add-item')) {
                     const newPlace = prompt("Ajouter un nouvel endroit à contrôler:");
                     if (newPlace && newPlace.trim()) {
                         placesToControl.push(newPlace.trim());
                         const newItem = createDropdownItem(newPlace.trim());
+                        newItem.dataset.colorState = '0';
                         const c2Menu = document.querySelector('#c2 .dropdown-menu');
                         c2Menu.insertBefore(newItem, dropdownItem);
                         updateResults();
@@ -553,7 +721,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     return;
                 }
 
-                // Si on est en mode Rat et on clique sur un endroit
+                // Si on est en mode Rat et on clique sur un endroit (sans couleur)
                 if (ratMode) {
                     cell.querySelector('.cell-content').textContent = text;
                     cell.classList.remove('text-green', 'text-red');
@@ -561,6 +729,53 @@ document.addEventListener('DOMContentLoaded', function() {
                     checkCompletion();
                     return;
                 }
+            }
+
+            // C3 : Gestion des couleurs pour Xylophage
+            if (cellId === 'c3' && dropdownItem.dataset.colorState !== undefined) {
+                let currentState = parseInt(dropdownItem.dataset.colorState || '0');
+                currentState = (currentState + 1) % 3;
+                dropdownItem.dataset.colorState = currentState;
+
+                dropdownItem.classList.remove('text-green', 'text-red');
+                cell.classList.remove('text-green', 'text-red');
+
+                if (currentState === 1) {
+                    dropdownItem.classList.add('text-green');
+                    cell.classList.add('text-green');
+                } else if (currentState === 2) {
+                    dropdownItem.classList.add('text-red');
+                    cell.classList.add('text-red');
+                }
+
+                cell.querySelector('.cell-content').textContent = 'Xylophage';
+                updateResults();
+                checkCompletion();
+                return;
+            }
+
+            // Autres cellules avec gestion des couleurs
+            if (dropdownItem.dataset.colorState !== undefined) {
+                let currentState = parseInt(dropdownItem.dataset.colorState || '0');
+                currentState = (currentState + 1) % 3;
+                dropdownItem.dataset.colorState = currentState;
+
+                dropdownItem.classList.remove('text-green', 'text-red');
+                cell.classList.remove('text-green', 'text-red');
+
+                if (currentState === 1) {
+                    dropdownItem.classList.add('text-green');
+                    cell.classList.add('text-green');
+                } else if (currentState === 2) {
+                    dropdownItem.classList.add('text-red');
+                    cell.classList.add('text-red');
+                }
+
+                const contentSpan = cell.querySelector('.cell-content');
+                contentSpan.textContent = dropdownItem.querySelector('.dropdown-item-content').textContent;
+                updateResults();
+                checkCompletion();
+                return;
             }
 
             // Autres cas normaux
@@ -598,6 +813,9 @@ document.addEventListener('DOMContentLoaded', function() {
             checkCompletion();
         }
     });
+
+    // Bouton d'actualisation
+    document.getElementById('refresh-button').addEventListener('click', manualRefresh);
 });
 </script>
 </body>
