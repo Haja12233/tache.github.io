@@ -61,7 +61,7 @@
             word-break: break-word;
         }
 
-        .cell:hover:not(.empty-cell) {
+        .cell:hover:not(.empty-cell):not(.default-user-active) {
             border-color: #007bff;
             box-shadow: 0 0 8px rgba(0, 123, 255, 0.2);
         }
@@ -154,6 +154,37 @@
             font-weight: bold;
         }
 
+        /* Style pour le nom par défaut */
+        .default-user {
+            opacity: 0.7;
+            font-style: italic;
+        }
+
+        /* Style pour la cellule D1 quand un utilisateur par défaut est actif */
+        .default-user-active {
+            cursor: default;
+        }
+
+        .default-user-active .cell-content {
+            opacity: 0.7;
+            font-style: italic;
+        }
+
+        /* Style pour les éléments par défaut dans A1 - transparent */
+        .default-a1-item {
+            opacity: 0.6;
+            background-color: #e9ecef;
+            font-weight: bold;
+        }
+
+        /* Style pour les éléments expirés */
+        .expired-item {
+            opacity: 0.4;
+            background-color: #f8d7da;
+            color: #721c24;
+            font-style: italic;
+        }
+
         /* Bouton d'actualisation */
         #refresh-button {
             margin-top: 20px;
@@ -231,10 +262,10 @@
 <div id="notification-banner">Tâche complète ! 🎉</div>
 
 <div class="container">
-    <h1>Gestion de Tâche</h1>
+    <h1>Projet II: Gestion de Tâche</h1>
     <div class="grid">
         <div class="cell" id="a1" data-initial-text="Locale">
-            <span class="cell-content">Local</span>
+            <span class="cell-content">Locale</span>
             <div class="dropdown-menu"></div>
         </div>
         <div class="cell empty-cell" id="b1" data-initial-text="">
@@ -294,6 +325,11 @@ document.addEventListener('DOMContentLoaded', function() {
     let placesToControl = ['Chambre'];
     let ratMode = false; // Pour suivre si on est en mode Rat
     let coloredItemsC2 = {}; // Pour stocker les éléments colorés de C2 avec leurs couleurs
+    let defaultUser = null; // Pour stocker l'utilisateur par défaut de D1
+    let defaultUserExpiry = null; // Pour stocker l'expiration de l'utilisateur par défaut de D1
+    let defaultLocales = []; // Pour stocker les locales par défaut de A1
+    let defaultLocalesExpiry = null; // Pour stocker l'expiration des locales par défaut de A1
+    let lastDefaultLocale = null; // Pour stocker la dernière locale sélectionnée par défaut
 
     // Cases obligatoires
     const requiredCells = ['a1', 'a2', 'a3', 'c2', 'c3', 'd1'];
@@ -359,6 +395,202 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
         }
+    }
+
+    // --- Gestion de l'utilisateur par défaut de D1 ---
+    function saveDefaultUser() {
+        if (defaultUser) {
+            const userData = {
+                user: defaultUser,
+                expiry: defaultUserExpiry
+            };
+            localStorage.setItem('defaultUserD1', JSON.stringify(userData));
+        }
+    }
+
+    function loadDefaultUser() {
+        const savedDefaultUser = localStorage.getItem('defaultUserD1');
+        if (savedDefaultUser) {
+            const userData = JSON.parse(savedDefaultUser);
+            const now = new Date().getTime();
+            
+            // Vérifier si l'utilisateur par défaut n'a pas expiré (8 heures = 28800000 ms)
+            if (userData.expiry > now) {
+                defaultUser = userData.user;
+                defaultUserExpiry = userData.expiry;
+                
+                // Appliquer l'utilisateur par défaut
+                const d1Cell = document.getElementById('d1');
+                const contentSpan = d1Cell.querySelector('.cell-content');
+                contentSpan.textContent = defaultUser;
+                contentSpan.classList.add('default-user');
+                d1Cell.classList.add('default-user-active');
+                
+                // Mettre à jour le menu déroulant
+                updateD1MenuWithDefault();
+            } else {
+                // L'utilisateur par défaut a expiré, le supprimer
+                localStorage.removeItem('defaultUserD1');
+            }
+        }
+    }
+
+    function setDefaultUser(userName) {
+        defaultUser = userName;
+        defaultUserExpiry = new Date().getTime() + (8 * 60 * 60 * 1000); // 8 heures en millisecondes
+        
+        // Appliquer l'utilisateur par défaut
+        const d1Cell = document.getElementById('d1');
+        const contentSpan = d1Cell.querySelector('.cell-content');
+        contentSpan.textContent = defaultUser;
+        contentSpan.classList.add('default-user');
+        d1Cell.classList.add('default-user-active');
+        
+        // Sauvegarder dans localStorage
+        saveDefaultUser();
+        
+        // Mettre à jour le menu déroulant
+        updateD1MenuWithDefault();
+        
+        // Afficher notification
+        showDefaultUserNotification();
+    }
+
+    function updateD1MenuWithDefault() {
+        const d1Menu = document.querySelector('#d1 .dropdown-menu');
+        d1Menu.innerHTML = '';
+        
+        // Ajouter l'utilisateur par défaut en premier avec une indication spéciale
+        if (defaultUser) {
+            const defaultItem = createDropdownItem(`★ ${defaultUser} (par défaut)`);
+            defaultItem.classList.add('default-user-item');
+            defaultItem.dataset.defaultUser = 'true';
+            d1Menu.appendChild(defaultItem);
+        }
+        
+        // Ajouter les autres utilisateurs
+        initialUsers.forEach(user => {
+            if (user !== defaultUser) {
+                d1Menu.appendChild(createDropdownItem(user));
+            }
+        });
+        
+        // Ajouter le bouton +
+        const addUserItem = createDropdownItem('+');
+        addUserItem.classList.add('add-item');
+        d1Menu.appendChild(addUserItem);
+    }
+
+    function showDefaultUserNotification() {
+        const notification = document.getElementById('notification-banner');
+        notification.textContent = `Utilisateur "${defaultUser}" défini par défaut pour 8h !`;
+        notification.classList.add('show');
+        
+        setTimeout(() => {
+            notification.classList.remove('show');
+        }, 3000);
+    }
+
+    // --- Gestion des locales par défaut de A1 ---
+    function saveDefaultLocales() {
+        if (defaultLocales.length > 0) {
+            const localesData = {
+                locales: defaultLocales,
+                lastLocale: lastDefaultLocale,
+                expiry: defaultLocalesExpiry
+            };
+            localStorage.setItem('defaultLocalesA1', JSON.stringify(localesData));
+        }
+    }
+
+    function loadDefaultLocales() {
+        const savedDefaultLocales = localStorage.getItem('defaultLocalesA1');
+        if (savedDefaultLocales) {
+            const localesData = JSON.parse(savedDefaultLocales);
+            const now = new Date().getTime();
+            
+            // Vérifier si les locales par défaut n'ont pas expiré (8 heures = 28800000 ms)
+            if (localesData.expiry > now) {
+                defaultLocales = localesData.locales;
+                defaultLocalesExpiry = localesData.expiry;
+                lastDefaultLocale = localesData.lastLocale;
+                
+                // Afficher la dernière locale sélectionnée dans la cellule A1
+                if (lastDefaultLocale) {
+                    const a1Cell = document.getElementById('a1');
+                    const contentSpan = a1Cell.querySelector('.cell-content');
+                    contentSpan.textContent = lastDefaultLocale;
+                    contentSpan.classList.add('default-user');
+                }
+                
+                // Mettre à jour le menu déroulant
+                updateA1MenuWithDefaults();
+            } else {
+                // Les locales par défaut ont expiré, les supprimer
+                localStorage.removeItem('defaultLocalesA1');
+            }
+        }
+    }
+
+    function addDefaultLocale(localeName) {
+        // Si c'est le premier élément par défaut, définir l'expiration
+        if (defaultLocales.length === 0) {
+            defaultLocalesExpiry = new Date().getTime() + (8 * 60 * 60 * 1000); // 8 heures en millisecondes
+        }
+        
+        // Ajouter la locale à la liste des par défaut si elle n'y est pas déjà
+        if (!defaultLocales.includes(localeName)) {
+            defaultLocales.push(localeName);
+        }
+        
+        // Mettre à jour la dernière locale sélectionnée
+        lastDefaultLocale = localeName;
+        
+        // Afficher la dernière locale dans la cellule A1
+        const a1Cell = document.getElementById('a1');
+        const contentSpan = a1Cell.querySelector('.cell-content');
+        contentSpan.textContent = lastDefaultLocale;
+        contentSpan.classList.add('default-user');
+        
+        // Sauvegarder dans localStorage
+        saveDefaultLocales();
+        
+        // Mettre à jour le menu déroulant
+        updateA1MenuWithDefaults();
+        
+        // Afficher notification
+        showDefaultLocaleNotification(localeName);
+    }
+
+    function updateA1MenuWithDefaults() {
+        const a1Menu = document.querySelector('#a1 .dropdown-menu');
+        a1Menu.innerHTML = '';
+        
+        // Ajouter les locales par défaut en premier avec une indication spéciale (style transparent)
+        defaultLocales.forEach(localeName => {
+            const defaultItem = createDropdownItem(`★ ${localeName} (par défaut)`);
+            defaultItem.classList.add('default-a1-item');
+            defaultItem.dataset.defaultLocale = 'true';
+            a1Menu.appendChild(defaultItem);
+        });
+        
+        // Ajouter les autres locales
+        for (let i = 1; i <= 10; i++) {
+            const localeName = `P${i}`;
+            if (!defaultLocales.includes(localeName)) {
+                a1Menu.appendChild(createDropdownItem(localeName));
+            }
+        }
+    }
+
+    function showDefaultLocaleNotification(localeName) {
+        const notification = document.getElementById('notification-banner');
+        notification.textContent = `Locale "${localeName}" définie comme dernière par défaut pour 8h !`;
+        notification.classList.add('show');
+        
+        setTimeout(() => {
+            notification.classList.remove('show');
+        }, 3000);
     }
 
     // --- Création d'éléments ---
@@ -447,14 +679,28 @@ document.addEventListener('DOMContentLoaded', function() {
             
             if (contentSpan) {
                 contentSpan.textContent = initialText;
+                contentSpan.classList.remove('default-user');
             } else if (contentButton) {
                 contentButton.textContent = initialText;
             }
-            cell.classList.remove('text-green', 'text-red');
+            cell.classList.remove('text-green', 'text-red', 'default-user-active');
         });
 
         resetC2();
         saveResults();
+        
+        // Réinitialiser les valeurs par défaut
+        defaultUser = null;
+        defaultUserExpiry = null;
+        defaultLocales = [];
+        defaultLocalesExpiry = null;
+        lastDefaultLocale = null;
+        localStorage.removeItem('defaultUserD1');
+        localStorage.removeItem('defaultLocalesA1');
+        
+        // Réinitialiser les menus déroulants
+        updateA1MenuWithDefaults();
+        updateD1MenuWithDefault();
     }
 
     // --- Mise à jour des résultats ---
@@ -609,6 +855,8 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     loadResults();
+    loadDefaultUser(); // Charger l'utilisateur par défaut de D1 au démarrage
+    loadDefaultLocales(); // Charger les locales par défaut de A1 au démarrage
 
     // --- Événements ---
     const grid = document.querySelector('.grid');
@@ -617,6 +865,11 @@ document.addEventListener('DOMContentLoaded', function() {
     grid.addEventListener('click', function(event) {
         const cell = event.target.closest('.cell');
         if (!cell || cell.classList.contains('empty-cell')) return;
+
+        // Empêcher l'interaction avec D1 si un utilisateur par défaut est actif
+        if (cell.id === 'd1' && cell.classList.contains('default-user-active')) {
+            return;
+        }
 
         if (event.target.tagName === 'BUTTON') {
             const now = new Date();
@@ -635,6 +888,20 @@ document.addEventListener('DOMContentLoaded', function() {
         if (dropdownItem) {
             const cellId = cell.id;
 
+            // A1 : Gérer l'ajout de locales par défaut
+            if (cellId === 'a1') {
+                const selectedLocale = dropdownItem.querySelector('.dropdown-item-content').textContent;
+                // Retirer le préfixe ★ s'il existe
+                const cleanLocale = selectedLocale.replace(/^★ /, '').replace(/ \(par défaut\)$/, '');
+                
+                // Ajouter comme locale par défaut et afficher dans la cellule
+                addDefaultLocale(cleanLocale);
+                
+                updateResults();
+                checkCompletion();
+                return;
+            }
+
             // D1 : Gérer l'ajout de nouveaux utilisateurs
             if (cellId === 'd1' && dropdownItem.classList.contains('add-item')) {
                 const newName = prompt("Veuillez entrer un nouveau prénom :");
@@ -646,6 +913,20 @@ document.addEventListener('DOMContentLoaded', function() {
                     updateResults();
                     checkCompletion();
                 }
+                return;
+            }
+
+            // D1 : Gérer la sélection d'un utilisateur comme par défaut
+            if (cellId === 'd1' && !dropdownItem.classList.contains('add-item')) {
+                const selectedUser = dropdownItem.querySelector('.dropdown-item-content').textContent;
+                // Retirer le préfixe ★ s'il existe
+                const cleanUser = selectedUser.replace(/^★ /, '').replace(/ \(par défaut\)$/, '');
+                
+                // Définir comme utilisateur par défaut
+                setDefaultUser(cleanUser);
+                
+                updateResults();
+                checkCompletion();
                 return;
             }
 
@@ -820,4 +1101,3 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 </body>
 </html>
-
